@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宠物商店 - 商品管理</title>
+  <link rel="stylesheet" href="../style.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</head>
+<body>
+<div id="app">
+  <header class="page-header">
+    <h1>📦 商品管理</h1>
+    <nav>
+      <a href="main.html" class="back-link">← 返回主页</a>
+    </nav>
+  </header>
+
+  <div class="card">
+    <div class="toolbar">
+      <button @click="loadProducts" class="btn-primary">刷新数据</button>
+      <button @click="showAllItems" class="btn-secondary">显示全部商品</button>
+      <button @click="showAddItemModal" class="btn-success">添加商品</button>
+    </div>
+
+    <section class="category-section">
+      <div class="category-buttons">
+        <div class="category-btn-wrapper" @mouseenter="showDropdown(1)" @mouseleave="hideDropdown">
+          <div class="category-btn" @click="selectCategory(1)">
+            <span class="category-icon">🍖</span>
+            <span class="category-name">宠物食品</span>
+          </div>
+          <div class="dropdown-menu" v-show="activeCategory === 1">
+            <div v-for="type in foodTypes" :key="type.id" class="dropdown-item" @click="selectType(type)">
+              {{ type.name }}
+            </div>
+          </div>
+        </div>
+
+        <div class="category-btn-wrapper" @mouseenter="showDropdown(2)" @mouseleave="hideDropdown">
+          <div class="category-btn" @click="selectCategory(2)">
+            <span class="category-icon">🎾</span>
+            <span class="category-name">宠物用品</span>
+          </div>
+          <div class="dropdown-menu" v-show="activeCategory === 2">
+            <div v-for="type in supplyTypes" :key="type.id" class="dropdown-item" @click="selectType(type)">
+              {{ type.name }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>{{ selectedCategoryName || '全部商品' }} - 商品列表</h3>
+      <div v-if="filteredItems.length === 0" class="empty-state">
+        暂无商品
+      </div>
+      <ul class="data-list" v-else>
+        <li v-for="i in filteredItems" :key="i.id" class="list-item">
+          <div class="item-info">
+            <span>{{ i.id }} - {{ i.name }} - ￥{{ i.price }} - 库存{{ i.stock }}</span>
+            <span :class="{'status-on': i.status===1, 'status-off': i.status===0}">
+              {{ i.status === 1 ? '已上架' : '未上架' }}
+            </span>
+          </div>
+          <div class="item-actions">
+            <button @click="showEditItemModal(i)" class="btn-small">编辑</button>
+            <button @click="publishItem(i.id)" :disabled="i.status===1" class="btn-small">上架</button>
+            <button @click="unpublishItem(i.id)" :disabled="i.status===0" class="btn-small btn-danger">下架</button>
+            <button @click="deleteItem(i.id)" class="btn-small btn-danger">删除</button>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="modal" v-if="showItemModal" @click.self="closeItemModal">
+    <div class="modal-content">
+      <h3>{{ isEditMode ? '编辑商品' : '添加商品' }}</h3>
+      <form @submit.prevent="saveItem">
+        <div class="form-group">
+          <label>商品名称：</label>
+          <input type="text" v-model="itemForm.name" required>
+        </div>
+        <div class="form-group">
+          <label>商品类型：</label>
+          <select v-model="itemForm.productTypeId" required>
+            <option value="">请选择类型</option>
+            <option v-for="type in productTypes" :key="type.id" :value="type.id">
+              {{ type.name }} ({{ getCategoryName(type.categoryId) }})
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>价格：</label>
+          <input type="number" v-model="itemForm.price" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>库存：</label>
+          <input type="number" v-model="itemForm.stock" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>状态：</label>
+          <select v-model="itemForm.status">
+            <option :value="0">未上架</option>
+            <option :value="1">已上架</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">保存</button>
+          <button type="button" @click="closeItemModal" class="btn-secondary">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="../js/product.js"></script>
+</body>
+</html>
