@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宠物商店 - 订单管理</title>
+  <link rel="stylesheet" href="../style.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <header class="page-header">
+    <h1>📋 订单管理</h1>
+    <nav>
+      <a href="main.html" class="back-link">← 返回主页</a>
+    </nav>
+  </header>
+
+  <div class="card">
+    <div class="toolbar">
+      <button @click="loadOrders" class="btn-primary">刷新数据</button>
+      <button @click="showAddOrderModal" class="btn-success">添加订单</button>
+    </div>
+    
+    <section class="section">
+      <h3>进行中订单</h3>
+      <div v-if="activeOrders.length === 0" class="empty-state">
+        暂无进行中订单
+      </div>
+      <ul class="data-list" v-else>
+        <li v-for="o in activeOrders" :key="o.id" class="list-item">
+          <div class="order-info">
+            <div class="order-header">
+              <strong>订单 #{{ o.id }}</strong>
+              <span :class="getStatusClass(o.status)">{{ getStatusText(o.status) }}</span>
+            </div>
+            <div class="order-details">
+              <div>💰 金额: ￥{{ o.amount }}</div>
+              <div>👤 用户ID: {{ o.accountId }}</div>
+              <div>📦 收货人: {{ o.receiverName }}</div>
+              <div>📞 电话: {{ o.receiverPhone }}</div>
+              <div>🏠 地址: {{ o.receiverAddress }}</div>
+            </div>
+            <div class="order-actions">
+              <button @click="shipOrder(o.id)" :disabled="o.status==='SHIPPED'" class="btn-success">
+                {{ o.status === 'SHIPPED' ? '已发货' : '标记发货' }}
+              </button>
+              <button @click="completeOrder(o.id)" :disabled="o.status!=='SHIPPED'" class="btn-primary">
+                完成订单
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h3>已完成订单</h3>
+      <div v-if="completedOrders.length === 0" class="empty-state">
+        暂无已完成订单
+      </div>
+      <ul class="data-list" v-else>
+        <li v-for="o in completedOrders" :key="o.id" class="list-item">
+          <div class="order-info">
+            <div class="order-header">
+              <strong>订单 #{{ o.id }}</strong>
+              <span :class="getStatusClass(o.status)">{{ getStatusText(o.status) }}</span>
+            </div>
+            <div class="order-details">
+              <div>💰 金额: ￥{{ o.amount }}</div>
+              <div>👤 用户ID: {{ o.accountId }}</div>
+              <div>📦 收货人: {{ o.receiverName }}</div>
+              <div>📞 电话: {{ o.receiverPhone }}</div>
+              <div>🏠 地址: {{ o.receiverAddress }}</div>
+            </div>
+            <div class="order-actions">
+              <button @click="deleteOrder(o.id)" class="btn-danger">删除订单</button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="modal" v-if="showOrderModal" @click.self="closeOrderModal">
+    <div class="modal-content">
+      <h3>添加订单</h3>
+      <form @submit.prevent="saveOrder">
+        <div class="form-group">
+          <label>用户ID：</label>
+          <input type="number" v-model="orderForm.accountId" required>
+        </div>
+        <div class="form-group">
+          <label>订单金额：</label>
+          <input type="number" v-model="orderForm.amount" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>收货人姓名：</label>
+          <input type="text" v-model="orderForm.receiverName" required>
+        </div>
+        <div class="form-group">
+          <label>收货人电话：</label>
+          <input type="text" v-model="orderForm.receiverPhone" required>
+        </div>
+        <div class="form-group">
+          <label>收货地址：</label>
+          <input type="text" v-model="orderForm.receiverAddress" required>
+        </div>
+        <div class="form-group">
+          <label>订单状态：</label>
+          <select v-model="orderForm.status">
+            <option value="PAID">已付款</option>
+            <option value="SHIPPED">已发货</option>
+            <option value="DELIVERED">已完成</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">保存</button>
+          <button type="button" @click="closeOrderModal" class="btn-secondary">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="../js/order.js"></script>
+</body>
+</html>

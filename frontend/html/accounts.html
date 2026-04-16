@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宠物商店 - 用户管理</title>
+  <link rel="stylesheet" href="../style.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <header class="page-header">
+    <h1>👥 用户管理</h1>
+    <nav>
+      <a href="main.html" class="back-link">← 返回主页</a>
+    </nav>
+  </header>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="search-bar">
+        <input type="text" v-model="searchUsername" placeholder="输入用户名进行搜索" @keyup.enter="searchUsers">
+        <button @click="searchUsers" class="btn-primary">搜索</button>
+        <button @click="loadAccounts" class="btn-secondary">显示全部</button>
+        <button @click="showAddModal" class="btn-success">添加用户</button>
+      </div>
+    </div>
+    
+    <section class="section">
+      <h3>用户列表</h3>
+      <ul class="data-list">
+        <li v-for="u in accounts" :key="u.id" class="list-item">
+          <div class="user-info">
+            <div class="user-details">
+              <strong>{{ u.username }}</strong> (ID: {{ u.id }})<br>
+              <span class="contact-info">📞 {{ u.phone }} | ✉️ {{ u.email }}</span><br>
+              <span class="address">🏠 {{ u.address }}</span>
+            </div>
+            <div class="user-actions">
+              <button @click="showEditModal(u)" class="btn-small">编辑</button>
+              <button @click="resetPwd(u.id)" class="btn-small btn-warning">重置密码</button>
+              <button @click="deleteAccount(u.id)" class="btn-small btn-danger">删除</button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="modal" v-if="showModal" @click.self="closeModal">
+    <div class="modal-content">
+      <h3>{{ isEditMode ? '编辑用户' : '添加用户' }}</h3>
+      <form @submit.prevent="saveAccount">
+        <div class="form-group">
+          <label>用户名：</label>
+          <input type="text" v-model="formData.username" required>
+        </div>
+        <div class="form-group">
+          <label>手机号：</label>
+          <input type="text" v-model="formData.phone">
+        </div>
+        <div class="form-group">
+          <label>邮箱：</label>
+          <input type="email" v-model="formData.email">
+        </div>
+        <div class="form-group" v-if="!isEditMode">
+          <label>密码：</label>
+          <input type="password" v-model="formData.password" required>
+        </div>
+        <div class="form-group">
+          <label>地址：</label>
+          <input type="text" v-model="formData.address">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">保存</button>
+          <button type="button" @click="closeModal" class="btn-secondary">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="../js/account.js"></script>
+</body>
+</html>
